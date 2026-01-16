@@ -10,10 +10,7 @@ import org.bukkit.entity.Player
 import taboolib.common.platform.function.warning
 import taboolib.common5.cbool
 import taboolib.library.configuration.ConfigurationSection
-import taboolib.module.kether.KetherFunction
-import taboolib.module.kether.KetherShell
-import taboolib.module.kether.extend
-import taboolib.module.kether.printKetherErrorMessage
+import taboolib.module.kether.*
 import java.io.File
 import java.util.concurrent.CompletableFuture
 import java.util.function.Consumer
@@ -139,7 +136,7 @@ data class Conversation(
                             // 添加对话内容
                             session.npcSide.addAll(npcSide.map {
                                 try {
-                                    KetherFunction.parse(it, namespace = namespaceConversationNPC) { extend(session.variables) }
+                                    KetherFunction.parse(it, ScriptOptions.builder().namespace(namespaceConversationNPC).context { extend(session.variables) }.build())
                                 } catch (e: Throwable) {
                                     e.printKetherErrorMessage()
                                     e.localizedMessage
@@ -174,7 +171,7 @@ data class Conversation(
                 return@also
             }
             try {
-                KetherShell.eval(condition!!, namespace = namespaceConversationNPC) { extend(session.variables) }.thenApply { future.complete(it.cbool) }
+                KetherShell.eval(condition!!, ScriptOptions.builder().namespace(namespaceConversationNPC).context { extend(session.variables) }.build()).thenApply { future.complete(it.cbool) }
             } catch (e: Throwable) {
                 future.complete(false)
                 e.printKetherErrorMessage()
@@ -200,10 +197,10 @@ data class Conversation(
             if (cur < agents.size) {
                 try {
                     val agent = agents[cur].action.toMutableList().also { it.add("agent") }
-                    KetherShell.eval(agent, namespace = type.namespaceAll()) {
+                    KetherShell.eval(agent, ScriptOptions.builder().namespace(type.namespaceAll()).context {
                         extend(session.variables)
                         extend(mapOf("type" to type.name, "@Session" to session))
-                    }.thenApply {
+                    }.build()).thenApply {
                         if (session.variables["@Cancelled"].cbool) {
                             future.complete(null)
                         } else {

@@ -15,12 +15,9 @@ import taboolib.common.platform.function.adaptPlayer
 import taboolib.common.util.asList
 import taboolib.common5.cint
 import taboolib.module.chat.colored
-import taboolib.module.kether.KetherFunction
-import taboolib.module.kether.KetherShell
-import taboolib.module.kether.extend
-import taboolib.module.kether.printKetherErrorMessage
+import taboolib.module.kether.*
 import taboolib.module.ui.openMenu
-import taboolib.module.ui.type.Basic
+import taboolib.module.ui.type.Chest
 import taboolib.platform.util.modifyMeta
 import java.util.concurrent.CompletableFuture
 
@@ -45,7 +42,7 @@ object ThemeChest : Theme<ThemeChestSetting>() {
         var end = false
         return session.createDisplay { replies ->
             rows(session.player, replies.size).thenAccept { rows ->
-                session.player.openMenu<Basic>(settings.title.toTitle(session)) {
+                session.player.openMenu<Chest>(settings.title.toTitle(session)) {
                     rows(rows)
                     onBuild(async = true) { _, inventory ->
                         replies.forEachIndexed { index, reply ->
@@ -92,7 +89,7 @@ object ThemeChest : Theme<ThemeChestSetting>() {
             setDisplayName(displayName.replace("index" to index.toString(), "player_side" to build, "playerSide" to build))
             lore = lore?.map { line ->
                 val str = line.replace("index" to index.toString(), "player_side" to build, "playerSide" to build)
-                KetherFunction.parse(str, sender = adaptPlayer(session.player), namespace = namespace)
+                KetherFunction.parse(str, ScriptOptions.builder().sender(adaptPlayer(session.player)).namespace(namespace).build())
             }
         }
     }
@@ -105,7 +102,7 @@ object ThemeChest : Theme<ThemeChestSetting>() {
         return modifyMeta<ItemMeta> {
             setDisplayName(displayName.toTitle(session))
             lore = lore?.flatMap { line ->
-                val str = KetherFunction.parse(line, sender = adaptPlayer(session.player), namespace = namespace)
+                val str = KetherFunction.parse(line, ScriptOptions.builder().sender(adaptPlayer(session.player)).namespace(namespace).build())
                 if (str.contains("npc_side") || str.contains("npcSide")) {
                     message.map { str.replace("npc_side" to it, "npcSide" to it) }
                 } else {
@@ -117,14 +114,14 @@ object ThemeChest : Theme<ThemeChestSetting>() {
 
     private fun String.toTitle(session: Session): String {
         val str = replace("title" to session.conversation.option.title.replace("name" to session.source.name)).colored()
-        return KetherFunction.parse(str, sender = adaptPlayer(session.player), namespace = namespace)
+        return KetherFunction.parse(str, ScriptOptions.builder().sender(adaptPlayer(session.player)).namespace(namespace).build())
     }
 
     private fun rows(player: Player, size: Int): CompletableFuture<Int> {
         return try {
-            KetherShell.eval(settings.rows, sender = adaptPlayer(player), namespace = namespace) {
+            KetherShell.eval(settings.rows, ScriptOptions.builder().sender(adaptPlayer(player)).namespace(namespace).context {
                 extend(mapOf("size" to size))
-            }.thenApply {
+            }.build()).thenApply {
                 it.cint
             }
         } catch (ex: Exception) {

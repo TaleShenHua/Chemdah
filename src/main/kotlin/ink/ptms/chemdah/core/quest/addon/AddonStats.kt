@@ -25,6 +25,7 @@ import taboolib.library.configuration.ConfigurationSection
 import taboolib.library.kether.QuestContext
 import taboolib.module.configuration.util.getStringColored
 import taboolib.module.kether.KetherShell
+import taboolib.module.kether.ScriptOptions
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicReference
@@ -124,9 +125,9 @@ class AddonStats(config: ConfigurationSection, questContainer: QuestContainer) :
                 return future
             }
             val refs = AtomicReference<QuestContext.VarTable>()
-            KetherShell.eval(agent, sender = adaptPlayer(profile.player), namespace = namespaceQuest) {
+            KetherShell.eval(agent, ScriptOptions.builder().sender(adaptPlayer(profile.player)).namespace(namespaceQuest).context {
                 refs.set(rootFrame().variables().also { vars -> vars.set("@QuestContainer", task) })
-            }.thenApply {
+            }.build()).thenApply {
                 task.objective.getProgress(profile, task).run {
                     future.complete(
                         Progress(

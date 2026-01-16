@@ -1,10 +1,10 @@
 package ink.ptms.chemdah.core.quest.selector
 
 import ink.ptms.chemdah.core.bukkit.NMS
-import ink.ptms.chemdah.core.quest.selector.Flags.Companion.matchType
 import taboolib.common.platform.function.console
 import taboolib.module.lang.sendLang
 import taboolib.module.nms.MinecraftVersion
+import taboolib.module.nms.MinecraftVersion.versionId
 
 /**
  * Chemdah
@@ -57,7 +57,7 @@ class InferBlock(val mats: List<Block>) {
             if (indexOf('[') > -1 && endsWith(']')) {
                 type = substring(0, indexOf('['))
                 // 只有 1.13+ 才允许加载 BlockData 选择器
-                if (MinecraftVersion.majorLegacy >= 11300) {
+                if (versionId >= 11300) {
                     data += substring(indexOf('[') + 1, length - 1).split(',').map { DataMatch.fromString(it.trim()) }
                 }
             } else {

@@ -1,10 +1,9 @@
-package ink.ptms.chemdah.core.quest.objective.skillapi
+package ink.ptms.chemdah.core.quest.objective.planners
 
-import com.sucy.skill.api.event.SkillDamageEvent
+import com.bh.planners.api.event.DamageByEntity
 import ink.ptms.chemdah.core.quest.objective.Dependency
 import ink.ptms.chemdah.core.quest.objective.ObjectiveCountableI
 import org.bukkit.entity.Player
-import taboolib.common5.cdouble
 
 /**
  * Chemdah
@@ -13,11 +12,11 @@ import taboolib.common5.cdouble
  * @author Peng_Lx
  * @since 2021/5/29 7:59 下午
  */
-@Dependency("SkillAPI")
-object SSkillDamage : ObjectiveCountableI<SkillDamageEvent>() {
+@Dependency("Planners")
+object SSkillDamage : ObjectiveCountableI<DamageByEntity.Post>() {
 
     override val name = "skillapi skill damage"
-    override val event = SkillDamageEvent::class.java
+    override val event = DamageByEntity.Post::class.java
 
     init {
         handler {
@@ -27,13 +26,13 @@ object SSkillDamage : ObjectiveCountableI<SkillDamageEvent>() {
             data.toPosition().inside(it.damager.location)
         }
         addSimpleCondition("damage") { data, it ->
-            data.toDouble() <= it.damage
+            data.toDouble() <= it.getDamage()
         }
         addConditionVariable("damage") {
-            it.damage
+            it.getDamage()
         }
         addConditionVariable("target") {
-            it.target
+            it.entity
         }
     }
 }

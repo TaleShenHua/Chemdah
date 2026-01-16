@@ -20,7 +20,8 @@ import ink.ptms.chemdah.util.replace
 import ink.ptms.chemdah.util.splitBy
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
-import taboolib.common.platform.function.*
+import taboolib.common.platform.function.adaptCommandSender
+import taboolib.common.platform.function.warning
 import taboolib.common.util.asList
 import taboolib.common.util.resettableLazy
 import taboolib.common.util.unsafeLazy
@@ -30,6 +31,7 @@ import taboolib.library.configuration.ConfigurationSection
 import taboolib.module.chat.colored
 import taboolib.module.kether.KetherFunction
 import taboolib.module.kether.KetherShell
+import taboolib.module.kether.ScriptOptions
 import taboolib.module.nms.sendScoreboard
 import java.util.concurrent.ConcurrentHashMap
 
@@ -106,9 +108,7 @@ class AddonTrack(config: ConfigurationSection, questContainer: QuestContainer) :
     fun formatDescription(sender: CommandSender, questSelected: String, def: List<String>): List<String> {
         return KetherFunction.parse(
             description ?: def,
-            namespace = namespaceQuestUI,
-            sender = adaptCommandSender(sender),
-            vars = KetherShell.VariableMap("@QuestSelected" to questSelected)
+            ScriptOptions.builder().namespace(namespaceQuestUI).sender(adaptCommandSender(sender)).vars(KetherShell.VariableMap("@QuestSelected" to questSelected)).build()
         ).splitBy(scoreboard.length)
     }
 
@@ -343,7 +343,7 @@ class AddonTrack(config: ConfigurationSection, questContainer: QuestContainer) :
                     // 任务信息
                     if (line.isQuestLine) {
                         // 获取条目
-                        quest.taskMap.flatMap task@ { (_, task) ->
+                        quest.taskMap.flatMap task@{ (_, task) ->
                             // 获取条目追踪
                             val taskTrack = task.track()
                             // 是否启用记分板

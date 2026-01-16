@@ -14,6 +14,7 @@ import taboolib.common5.Coerce
 import taboolib.library.configuration.ConfigurationSection
 import taboolib.library.xseries.parseToMaterial
 import taboolib.module.kether.KetherShell
+import taboolib.module.kether.ScriptOptions
 import taboolib.module.kether.printKetherErrorMessage
 import taboolib.platform.util.toBukkitLocation
 import java.lang.Integer.max
@@ -64,7 +65,7 @@ abstract class ScenesState(val index: Int, val root: ConfigurationSection) {
 
         override fun send(player: Player) {
             try {
-                KetherShell.eval(agent, sender = adaptCommandSender(player), namespace = namespaceQuest)
+                KetherShell.eval(agent, ScriptOptions.builder().sender(adaptCommandSender(player)).namespace(namespaceQuest).build())
             } catch (ex: Exception) {
                 ex.printKetherErrorMessage()
             }
@@ -108,7 +109,7 @@ abstract class ScenesState(val index: Int, val root: ConfigurationSection) {
 
         override fun send(player: Player) {
             try {
-                KetherShell.eval(agent, sender = adaptCommandSender(player), namespace = namespaceQuest)
+                KetherShell.eval(agent, ScriptOptions.builder().sender(adaptCommandSender(player)).namespace(namespaceQuest).build())
             } catch (ex: Exception) {
                 ex.printKetherErrorMessage()
             }

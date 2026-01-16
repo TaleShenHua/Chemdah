@@ -11,6 +11,7 @@ import taboolib.common.platform.event.SubscribeEvent
 import taboolib.module.configuration.Config
 import taboolib.module.configuration.Configuration
 import taboolib.module.nms.MinecraftVersion
+import taboolib.module.nms.MinecraftVersion.versionId
 import taboolib.platform.util.bukkitPlugin
 import taboolib.platform.util.isBlockMovement
 
@@ -44,7 +45,7 @@ object RealmsSystem : Module {
         if (e.player.location.getRealms() != null) {
             Bukkit.getOnlinePlayers().forEach { player ->
                 if (player.name != e.player.name) {
-                    if (MinecraftVersion.majorLegacy >= 11300) {
+                    if (versionId >= 11300) {
                         player.hidePlayer(bukkitPlugin, e.player)
                     } else {
                         player.hidePlayer(e.player)
@@ -61,7 +62,7 @@ object RealmsSystem : Module {
             if (realms != null) {
                 Bukkit.getOnlinePlayers().forEach { player ->
                     if (player.name != e.player.name && player.canSee(e.player)) {
-                        if (MinecraftVersion.majorLegacy >= 11300) {
+                        if (versionId >= 11300) {
                             player.hidePlayer(bukkitPlugin, e.player)
                         } else {
                             player.hidePlayer(e.player)

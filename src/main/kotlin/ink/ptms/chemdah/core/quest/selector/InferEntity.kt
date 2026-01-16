@@ -1,9 +1,7 @@
 package ink.ptms.chemdah.core.quest.selector
 
 import ink.ptms.chemdah.api.event.InferEntityHookEvent
-import ink.ptms.chemdah.core.quest.selector.Flags.Companion.matchType
-import ink.ptms.um.Mythic
-import net.citizensnpcs.api.CitizensAPI
+import io.lumine.xikage.mythicmobs.MythicMobs
 import taboolib.common.platform.function.warning
 import taboolib.common5.Coerce
 import taboolib.library.reflex.Reflex.Companion.invokeConstructor
@@ -40,36 +38,10 @@ class InferEntity(val entities: List<Entity>) {
         }
     }
 
-    @Suppress("IdentifierGrammar")
-    class CitizensEntity(material: String, flags: List<Flags>, data: List<DataMatch>) : Entity(material, flags, data) {
-
-        override fun match(entity: org.bukkit.entity.Entity): Boolean {
-            return matchType(entity.citizensId()) && matchData(entity)
-        }
-
-        override fun matchData(entity: org.bukkit.entity.Entity): Boolean {
-            val npc = CitizensAPI.getNPCRegistry().getNPC(entity)
-            return data.all {
-                when (it.key) {
-                    "type" -> it.check(npc.entity.type.name)
-                    "name" -> it.check(npc.fullName)
-                    else -> {
-                        warning("$name[${it.key}=${it.value}] not supported.")
-                        false
-                    }
-                }
-            }
-        }
-
-        fun org.bukkit.entity.Entity.citizensId(): String {
-            return CitizensAPI.getNPCRegistry().getNPC(this)?.id?.toString() ?: "@vanilla"
-        }
-    }
-
     class MythicMobsEntity(material: String, flags: List<Flags>, data: List<DataMatch>) : Entity(material, flags, data) {
 
         fun org.bukkit.entity.Entity.mythicMobId(): String {
-            return Mythic.API.getMob(this)?.id ?: "@vanilla"
+            return MythicMobs.inst().mobManager.getMythicMobInstance(this)?.type?.internalName ?: "@vanilla"
         }
 
         override fun match(entity: org.bukkit.entity.Entity): Boolean {
@@ -77,16 +49,16 @@ class InferEntity(val entities: List<Entity>) {
         }
 
         override fun matchData(entity: org.bukkit.entity.Entity): Boolean {
-            val mob = Mythic.API.getMob(entity) ?: return false
+            val mob = MythicMobs.inst().mobManager.getMythicMobInstance(entity) ?: return false
             return data.all {
                 when (it.key) {
-                    "type" -> it.check(mob.entityType.name)
+                    "type" -> it.check(mob.mobType)
                     "name" -> it.check(entity.getI18nName())
                     "level" -> Coerce.toDouble(it.value) <= mob.level
                     "stance" -> it.value == mob.stance
                     "faction" -> it.value == mob.faction
                     // 配置文件中的属性
-                    else -> it.check(mob.config.getString(it.key) ?: return false)
+                    else -> it.check(mob.type.config.getString(it.key) ?: return false)
                 }
             }
         }
@@ -111,7 +83,6 @@ class InferEntity(val entities: List<Entity>) {
             val entity = if (indexOfType in 0..(type.length - 2)) {
                 val entity = when (val namespace = type.substring(0, indexOfType)) {
                     "minecraft" -> Entity::class.java
-                    "citizen", "citizens" -> CitizensEntity::class.java
                     "mythicmob", "mythicmobs" -> MythicMobsEntity::class.java
                     else -> InferEntityHookEvent(namespace, Entity::class.java).apply { call() }.itemClass
                 }

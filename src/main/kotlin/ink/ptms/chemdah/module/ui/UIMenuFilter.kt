@@ -7,7 +7,7 @@ import org.bukkit.Sound
 import taboolib.common.platform.function.submit
 import taboolib.module.configuration.Configuration
 import taboolib.module.ui.openMenu
-import taboolib.module.ui.type.Linked
+import taboolib.module.ui.type.PageableChest
 import taboolib.platform.util.isAir
 
 /**
@@ -21,7 +21,7 @@ import taboolib.platform.util.isAir
 class UIMenuFilter(val ui: UI, val profile: PlayerProfile) {
 
     fun open(page: Int = 0) {
-        profile.player.openMenu<Linked<Include>>(ui.name.replace("name" to profile.player.name, "page" to "%p")) {
+        profile.player.openMenu<PageableChest<Include>>(ui.name.replace("name" to profile.player.name, "page" to "%p")) {
             page(page)
             rows(ui.menuFilterRows)
             slots(ui.menuFilterSlot)

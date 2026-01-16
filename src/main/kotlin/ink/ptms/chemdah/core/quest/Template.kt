@@ -23,7 +23,7 @@ class Template(id: String, config: ConfigurationSection) : QuestContainer(id, co
     /**
      * 所有任务条目
      */
-    val taskMap = HashMap<String, Task>()
+    val taskMap = mutableMapOf<String, Task>()
 
     /**
      * 元数据引用

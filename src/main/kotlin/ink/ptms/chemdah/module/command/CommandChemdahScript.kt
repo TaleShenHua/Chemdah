@@ -10,10 +10,7 @@ import taboolib.common.platform.command.mainCommand
 import taboolib.common.platform.command.subCommand
 import taboolib.common.platform.function.adaptCommandSender
 import taboolib.expansion.createHelper
-import taboolib.module.kether.Kether
-import taboolib.module.kether.KetherShell
-import taboolib.module.kether.ScriptContext
-import taboolib.module.kether.printKetherErrorMessage
+import taboolib.module.kether.*
 import taboolib.platform.util.sendLang
 
 @CommandHeader(name = "ChemdahScript", aliases = ["chs"], permission = "chemdah.command")
@@ -41,11 +38,11 @@ object CommandChemdahScript {
                 // ver
                 dynamic(comment ="args", optional = true) {
                     execute<CommandSender> { sender, ctx, argument ->
-                        commandRun(sender, ctx.argument(-2), ctx.argument(-1), argument.split(" ").toTypedArray())
+                        commandRun(sender, ctx["file"], ctx["viewer"], argument.split(" ").toTypedArray())
                     }
                 }
                 execute<CommandSender> { sender, ctx, argument ->
-                    commandRun(sender, ctx.argument(-1), argument)
+                    commandRun(sender, ctx["file"], argument)
                 }
             }
             execute<CommandSender> { sender, _, argument ->
@@ -108,7 +105,7 @@ object CommandChemdahScript {
         dynamic(comment ="script") {
             execute<CommandSender> { sender, _, argument ->
                 try {
-                    KetherShell.eval(argument, namespace = namespace, sender = adaptCommandSender(sender)).thenApply { v ->
+                    KetherShell.eval(argument, ScriptOptions.builder().namespace(namespace).sender(adaptCommandSender(sender)).build()).thenApply { v ->
                         sender.sendResult(v)
                     }
                 } catch (ex: Throwable) {
@@ -124,7 +121,7 @@ object CommandChemdahScript {
         dynamic(comment ="script") {
             execute<CommandSender> { sender, _, argument ->
                 try {
-                    sender.sendResult(KetherShell.eval(argument, namespace = namespace, sender = adaptCommandSender(sender)).getNow(null))
+                    sender.sendResult(KetherShell.eval(argument, ScriptOptions.builder().namespace(namespace).sender(adaptCommandSender(sender)).build()).getNow(null))
                 } catch (ex: Throwable) {
                     sender.sendMessage("§c[System] §7Error: ${ex.message}")
                     ex.printKetherErrorMessage()
@@ -138,7 +135,7 @@ object CommandChemdahScript {
         dynamic(comment ="script") {
             execute<CommandSender> { sender, _, argument ->
                 try {
-                    sender.sendResult(KetherShell.eval(argument, namespace = namespace, sender = adaptCommandSender(sender)).get())
+                    sender.sendResult(KetherShell.eval(argument, ScriptOptions.builder().namespace(namespace).sender(adaptCommandSender(sender)).build()).get())
                 } catch (ex: Throwable) {
                     sender.sendMessage("§c[System] §7Error: ${ex.message}")
                     ex.printKetherErrorMessage()

@@ -8,7 +8,7 @@ import ink.ptms.chemdah.util.replace
 import org.bukkit.Sound
 import taboolib.module.configuration.Configuration
 import taboolib.module.ui.openMenu
-import taboolib.module.ui.type.Linked
+import taboolib.module.ui.type.PageableChest
 import taboolib.platform.util.isAir
 
 /**
@@ -22,7 +22,7 @@ import taboolib.platform.util.isAir
 class UIMenu(val ui: UI, val profile: PlayerProfile, val templates: List<UITemplate>) {
 
     fun open(page: Int = 0) {
-        profile.player.openMenu<Linked<UITemplate>>(ui.name.replace("name" to profile.player.name, "page" to "%p")) {
+        profile.player.openMenu<PageableChest<UITemplate>>(ui.name.replace("name" to profile.player.name, "page" to "%p")) {
             page(page)
             rows(ui.menuQuestRows)
             slots(ui.menuQuestSlot)

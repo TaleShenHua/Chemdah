@@ -170,7 +170,7 @@ abstract class Objective<E : Any> {
      */
     open fun checkGoal(profile: PlayerProfile, quest: Quest, task: Task): CompletableFuture<Boolean> {
         return when {
-            hasCompletedSignature(profile, task) -> CompletableFuture.completedFuture(false)
+            hasCompletedSignature(profile, task) -> CompletableFuture.completedFuture(true)
             goals.all { it.value(profile, task) } -> profile.checkAgent(task.goal["$"]?.data, quest)
             else -> CompletableFuture.completedFuture(false)
         }

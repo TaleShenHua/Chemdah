@@ -53,7 +53,7 @@ class ActionInventory {
             frame.run(slot).int { slot ->
                 frame.run(amount).int { amount ->
                     val equipment = frame.getBukkitPlayer().inventory.getItem(slot)
-                    val value = if (equipment.isNotAir() && item.match(equipment!!)) {
+                    val value = if (equipment.isNotAir() && item.match(equipment)) {
                         equipment.amount >= amount
                     } else {
                         false
@@ -70,7 +70,7 @@ class ActionInventory {
         override fun run(frame: ScriptFrame): CompletableFuture<Any?> {
             return frame.run(amount).int { amount ->
                 val equipment = equipment.getItem(frame.getBukkitPlayer())
-                if (equipment.isNotAir() && item.match(equipment!!)) {
+                if (equipment.isNotAir() && item.match(equipment)) {
                     equipment.amount >= amount
                 } else {
                     false

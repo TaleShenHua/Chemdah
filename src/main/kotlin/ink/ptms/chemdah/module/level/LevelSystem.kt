@@ -13,6 +13,7 @@ import taboolib.common5.compileJS
 import taboolib.module.configuration.Config
 import taboolib.module.configuration.Configuration
 import taboolib.module.kether.KetherShell
+import taboolib.module.kether.ScriptOptions
 import taboolib.module.kether.printKetherErrorMessage
 import java.util.concurrent.CompletableFuture
 import javax.script.SimpleBindings
@@ -188,9 +189,9 @@ object LevelSystem : Module {
 
                         override fun getExp(level: Int): CompletableFuture<Int> {
                             return try {
-                                KetherShell.eval(section.getString("experience.math").toString()) {
+                                KetherShell.eval(section.getString("experience.math").toString(), ScriptOptions.builder().context {
                                     set("level", level)
-                                }.thenApply {
+                                }.build()).thenApply {
                                     Coerce.toInteger(it)
                                 }
                             } catch (ex: Exception) {

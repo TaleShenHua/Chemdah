@@ -3,6 +3,7 @@ package ink.ptms.chemdah.module.level
 import org.bukkit.entity.Player
 import taboolib.common.platform.function.adaptPlayer
 import taboolib.module.kether.KetherShell
+import taboolib.module.kether.ScriptOptions
 import taboolib.module.kether.printKetherErrorMessage
 
 /**
@@ -16,7 +17,7 @@ class LevelReward(val level: List<Int>, val script: List<String>) {
 
     fun eval(player: Player, level: Int) {
         try {
-            KetherShell.eval(script, sender = adaptPlayer(player)) { set("level", level) }
+            KetherShell.eval(script, ScriptOptions.builder().sender(adaptPlayer(player)).context { set("level", level) }.build())
         } catch (ex: Exception) {
             ex.printKetherErrorMessage()
         }

@@ -10,6 +10,7 @@ import taboolib.common.platform.function.warning
 import taboolib.common.util.asList
 import taboolib.common5.Coerce
 import taboolib.module.kether.KetherShell
+import taboolib.module.kether.ScriptOptions
 import taboolib.module.kether.printKetherErrorMessage
 import java.util.concurrent.CompletableFuture
 
@@ -38,9 +39,9 @@ class AddonRestart(root: Any?, questContainer: QuestContainer) : Addon(root, que
                     future.complete(false)
                 } else {
                     try {
-                        KetherShell.eval(reset, sender = adaptPlayer(profile.player), namespace = namespaceQuest) {
+                        KetherShell.eval(reset, ScriptOptions.builder().sender(adaptPlayer(profile.player)).namespace(namespaceQuest).context {
                             set("@QuestContainer", this@canRestart)
-                        }.thenApply {
+                        }.build()).thenApply {
                             future.complete(Coerce.toBoolean(it))
                         }
                     } catch (e: Throwable) {

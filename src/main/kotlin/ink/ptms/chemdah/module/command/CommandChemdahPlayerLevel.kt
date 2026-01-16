@@ -40,8 +40,8 @@ object CommandChemdahPlayerLevel {
                 // value
                 dynamic(comment = "value") {
                     execute<CommandSender> { sender, ctx, argument ->
-                        val option = getLevelOption(ctx.argument(-1))!!
-                        val profile = ctx.player(-2).cast<Player>().chemdahProfile
+                        val option = getLevelOption(ctx["player"])!!
+                        val profile = ctx.player("player").cast<Player>().chemdahProfile
                         profile.giveLevel(option, Coerce.toInteger(argument)).thenAccept {
                             if (sender is Player) {
                                 sender.sendLang("command-level-change", "§7${option.id} (LEVEL) §8+= §f${argument} §7(Lv.${it.level}, ${it.experience})")
@@ -63,8 +63,8 @@ object CommandChemdahPlayerLevel {
                 // value
                 dynamic(comment = "value") {
                     execute<CommandSender> { sender, ctx, argument ->
-                        val option = getLevelOption(ctx.argument(-1))!!
-                        val profile = ctx.player(-2).cast<Player>().chemdahProfile
+                        val option = getLevelOption(ctx["player"])!!
+                        val profile = ctx.player("player").cast<Player>().chemdahProfile
                         profile.setLevel(option, Coerce.toInteger(argument)).thenAccept {
                             if (sender is Player) {
                                 sender.sendLang("command-level-change", "§7${option.id} (LEVEL) §8= §f${argument} §7(Lv.${it.level}, ${it.experience})")
@@ -86,8 +86,8 @@ object CommandChemdahPlayerLevel {
                 // value
                 dynamic(comment = "value") {
                     execute<CommandSender> { sender, ctx, argument ->
-                        val option = getLevelOption(ctx.argument(-1))!!
-                        val profile = ctx.player(-2).cast<Player>().chemdahProfile
+                        val option = getLevelOption(ctx["player"])!!
+                        val profile = ctx.player("player").cast<Player>().chemdahProfile
                         profile.giveExperience(option, Coerce.toInteger(argument)).thenAccept {
                             if (sender is Player) {
                                 sender.sendLang("command-level-change", "§7${option.id} (EXP) §8+= §f${argument} §7(Lv.${it.level}, ${it.experience})")
@@ -109,8 +109,8 @@ object CommandChemdahPlayerLevel {
                 // value
                 dynamic(comment = "value") {
                     execute<CommandSender> { sender, ctx, argument ->
-                        val option = getLevelOption(ctx.argument(-1))!!
-                        val profile = ctx.player(-2).cast<Player>().chemdahProfile
+                        val option = getLevelOption(ctx["player"])!!
+                        val profile = ctx.player("player").cast<Player>().chemdahProfile
                         profile.setExperience(option, Coerce.toInteger(argument)).thenAccept {
                             if (sender is Player) {
                                 sender.sendLang("command-level-change", "§7${option.id} (EXP) §8= §f${argument} §7(Lv.${it.level}, ${it.experience})")

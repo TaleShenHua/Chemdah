@@ -7,7 +7,7 @@ import ink.ptms.chemdah.api.ChemdahAPI.isChemdahProfileLoaded
 import ink.ptms.chemdah.core.quest.addon.AddonTrack.Companion.trackQuest
 import ink.ptms.chemdah.core.quest.objective.other.getAvailableTriggers
 import ink.ptms.chemdah.module.ui.UISystem
-import org.apache.commons.lang3.time.DateFormatUtils
+import org.apache.commons.lang.time.DateFormatUtils
 import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
@@ -41,7 +41,7 @@ object CommandChemdahQuest {
             dynamic(comment = "quest") {
                 suggestion<CommandSender> { _, _ -> ChemdahAPI.questTemplate.keys.toList() }
                 execute<CommandSender> { _, ctx, argument ->
-                    ChemdahAPI.getQuestTemplate(argument)!!.acceptTo(ctx.player(-1).cast<Player>().chemdahProfile)
+                    ChemdahAPI.getQuestTemplate(argument)!!.acceptTo(ctx.player("player").cast<Player>().chemdahProfile)
                 }
             }
         }
@@ -53,10 +53,10 @@ object CommandChemdahQuest {
             suggestPlayers()
             dynamic(comment = "quest") {
                 suggestion<CommandSender>(uncheck = true) { _, ctx ->
-                    ctx.player(-1).cast<Player>().chemdahProfile.getQuests().map { it.id }
+                    ctx.player("player").cast<Player>().chemdahProfile.getQuests().map { it.id }
                 }
                 execute<CommandSender> { sender, ctx, argument ->
-                    val profile = ctx.player(-1).cast<Player>().chemdahProfile
+                    val profile = ctx.player("player").cast<Player>().chemdahProfile
                     if (argument == "*") {
                         profile.getQuests(false).forEach { it.failQuestFuture() }
                     } else {
@@ -78,10 +78,10 @@ object CommandChemdahQuest {
             suggestPlayers()
             dynamic(comment = "quest") {
                 suggestion<CommandSender>(uncheck = true) { _, ctx ->
-                    ctx.player(-1).cast<Player>().chemdahProfile.getQuests().map { it.id }
+                    ctx.player("player").cast<Player>().chemdahProfile.getQuests().map { it.id }
                 }
                 execute<CommandSender> { sender, ctx, argument ->
-                    val profile = ctx.player(-1).cast<Player>().chemdahProfile
+                    val profile = ctx.player("player").cast<Player>().chemdahProfile
                     if (argument == "*") {
                         profile.getQuests(false).forEach { it.completeQuest() }
                     } else {
@@ -103,10 +103,10 @@ object CommandChemdahQuest {
             suggestPlayers()
             dynamic(comment = "quest") {
                 suggestion<CommandSender>(uncheck = true) { _, ctx ->
-                    ctx.player(-1).cast<Player>().chemdahProfile.getQuests().map { it.id }
+                    ctx.player("player").cast<Player>().chemdahProfile.getQuests().map { it.id }
                 }
                 execute<CommandSender> { sender, ctx, argument ->
-                    val profile = ctx.player(-1).cast<Player>().chemdahProfile
+                    val profile = ctx.player("player").cast<Player>().chemdahProfile
                     if (argument == "*") {
                         profile.getQuests(false).forEach { it.restartQuestFuture() }
                     } else {
@@ -128,10 +128,10 @@ object CommandChemdahQuest {
             suggestPlayers()
             dynamic(comment = "quest") {
                 suggestion<CommandSender>(uncheck = true) { _, ctx ->
-                    ctx.player(-1).cast<Player>().chemdahProfile.getQuests().map { it.id }
+                    ctx.player("player").cast<Player>().chemdahProfile.getQuests().map { it.id }
                 }
                 execute<CommandSender> { sender, ctx, argument ->
-                    val profile = ctx.player(-1).cast<Player>().chemdahProfile
+                    val profile = ctx.player("player").cast<Player>().chemdahProfile
                     if (argument == "*") {
                         profile.getQuests(false).forEach { profile.unregisterQuest(it) }
                     } else {
@@ -152,9 +152,9 @@ object CommandChemdahQuest {
         dynamic(comment = "player") {
             suggestPlayers()
             dynamic(comment = "value") {
-                suggestion<CommandSender>(uncheck = true) { _, ctx -> ctx.player(-1).cast<Player>().chemdahProfile.getAvailableTriggers() }
+                suggestion<CommandSender>(uncheck = true) { _, ctx -> ctx.player("player").cast<Player>().chemdahProfile.getAvailableTriggers() }
                 execute<CommandSender> { _, ctx, argument ->
-                    ctx.player(-1).cast<Player>().callTrigger(argument)
+                    ctx.player("player").cast<Player>().callTrigger(argument)
                 }
             }
         }
@@ -178,13 +178,13 @@ object CommandChemdahQuest {
             suggestPlayers()
             dynamic(comment = "quest", optional = true) {
                 suggestion<CommandSender>(uncheck = true) { _, ctx ->
-                    ctx.player(-1).cast<Player>().chemdahProfile.getQuests(openAPI = true).map { it.id }
+                    ctx.player("player").cast<Player>().chemdahProfile.getQuests(openAPI = true).map { it.id }
                 }
                 execute<CommandSender> { sender, ctx, argument ->
                     if (Coerce.asInteger(argument).isPresent) {
-                        commandInfo(sender, ctx.argument(-1), Coerce.toInteger(argument) - 1)
+                        commandInfo(sender, ctx["player"], Coerce.toInteger(argument) - 1)
                     } else {
-                        commandInfo(sender, ctx.argument(-1), argument)
+                        commandInfo(sender, ctx["player"], argument)
                     }
                 }
             }
@@ -201,7 +201,7 @@ object CommandChemdahQuest {
             dynamic(comment = "ui") {
                 suggestion<CommandSender> { _, _ -> UISystem.ui.keys.toList() }
                 execute<CommandSender> { _, ctx, argument ->
-                    UISystem.getUI(argument)!!.open(ctx.player(-1).cast<Player>().chemdahProfile)
+                    UISystem.getUI(argument)!!.open(ctx.player("player").cast<Player>().chemdahProfile)
                 }
             }
         }
@@ -214,12 +214,12 @@ object CommandChemdahQuest {
             dynamic(comment = "quest") {
                 suggestion<CommandSender> { _, _ -> ChemdahAPI.questTemplate.keys.toList() }
                 execute<CommandSender> { _, ctx, argument ->
-                    ctx.player(-1).cast<Player>().chemdahProfile.trackQuest = ChemdahAPI.getQuestTemplate(argument)
+                    ctx.player("player").cast<Player>().chemdahProfile.trackQuest = ChemdahAPI.getQuestTemplate(argument)
                 }
             }
             literal("cancel") {
                 execute<CommandSender> { _, ctx, _ ->
-                    ctx.player(-1).cast<Player>().chemdahProfile.trackQuest = null
+                    ctx.player("player").cast<Player>().chemdahProfile.trackQuest = null
                 }
             }
         }

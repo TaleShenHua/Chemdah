@@ -13,6 +13,7 @@ import taboolib.common.util.asList
 import taboolib.library.configuration.ConfigurationSection
 import taboolib.library.reflex.Reflex.Companion.invokeConstructor
 import taboolib.module.kether.KetherShell
+import taboolib.module.kether.ScriptOptions
 import taboolib.module.kether.printKetherErrorMessage
 import java.util.concurrent.CompletableFuture
 
@@ -118,11 +119,11 @@ abstract class QuestContainer(val id: String, val config: ConfigurationSection) 
         fun process(cur: Int) {
             if (cur < agent.size) {
                 try {
-                    KetherShell.eval(agent[cur].action, sender = adaptPlayer(profile.player), namespace = agentType.namespaceAll()) {
+                    KetherShell.eval(agent[cur].action, ScriptOptions.builder().sender(adaptPlayer(profile.player)).namespace(agentType.namespaceAll()).context {
                         set("reason", reason)
                         set("@QuestSelected", node)
                         set("@QuestContainer", this@QuestContainer)
-                    }.thenApply {
+                    }.build()).thenApply {
                         if (it is Boolean && !it) {
                             future.complete(false)
                         } else {

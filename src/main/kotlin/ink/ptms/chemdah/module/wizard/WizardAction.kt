@@ -7,6 +7,7 @@ import org.bukkit.entity.Player
 import taboolib.common.platform.function.adaptPlayer
 import taboolib.common5.Baffle
 import taboolib.module.kether.KetherShell
+import taboolib.module.kether.ScriptOptions
 import taboolib.module.kether.runKether
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
@@ -77,7 +78,7 @@ class WizardAction(val player: Player, val entityInstance: EntityInstance, val i
                 state = State.MOVING
                 // 不在冷却中
                 if (cooldownMove.hasNext()) {
-                    info.eventOnContinue?.let { runKether { KetherShell.eval(it, sender = adaptPlayer(player), namespace = namespace) } }
+                    info.eventOnContinue?.let { runKether { KetherShell.eval(it, ScriptOptions.builder().sender(adaptPlayer(player)).namespace(namespace).build()) } }
                 }
             }
         } else {
@@ -87,7 +88,7 @@ class WizardAction(val player: Player, val entityInstance: EntityInstance, val i
                 state = State.WAITING
                 // 不在冷却中
                 if (cooldownWait.hasNext()) {
-                    info.eventOnWaiting?.let { runKether { KetherShell.eval(it, sender = adaptPlayer(player), namespace = namespace) } }
+                    info.eventOnWaiting?.let { runKether { KetherShell.eval(it, ScriptOptions.builder().sender(adaptPlayer(player)).namespace(namespace).build()) } }
                 }
             }
         }

@@ -1,5 +1,8 @@
 package ink.ptms.chemdah.core.quest.objective.bukkit
 
+import com.hitable.hipeequip.event.PlayerBackpackSetItemEvent
+import com.hitable.hipeequip.event.PlayerLootItemEvent
+import com.hitable.hipeequip.manager.BackpackManager.backpack
 import ink.ptms.chemdah.core.PlayerProfile
 import ink.ptms.chemdah.core.quest.Task
 import ink.ptms.chemdah.core.quest.objective.Dependency
@@ -15,30 +18,30 @@ import org.bukkit.event.entity.EntityPickupItemEvent
  * @since 2021/3/2 5:09 下午
  */
 @Dependency("minecraft")
-object IItemPick : ObjectiveCountableI<EntityPickupItemEvent>() {
+object IItemPick : ObjectiveCountableI<PlayerLootItemEvent>() {
 
     override val name = "pickup item"
-    override val event = EntityPickupItemEvent::class.java
+    override val event = PlayerLootItemEvent::class.java
 
     init {
         handler {
-            it.entity as? Player
+            it.player
         }
         addSimpleCondition("position") { data, e ->
-            data.toPosition().inside(e.entity.location)
+            data.toPosition().inside(e.player.location)
         }
         addSimpleCondition("item") { data, e ->
-            data.toInferItem().isItem(e.item.itemStack)
+            e.itemData?.itemKey == data.toString()
         }
         addSimpleCondition("amount") { data, e ->
-            data.toInt() <= e.item.itemStack.amount
+            data.toInt() <= (e.itemData?.amount ?: 0)
         }
         addConditionVariable("amount") {
-            it.item.itemStack.amount
+            it.itemData?.amount ?: 0
         }
     }
 
-    override fun getCount(profile: PlayerProfile, task: Task, event: EntityPickupItemEvent): Int {
-        return event.item.itemStack.amount
+    override fun getCount(profile: PlayerProfile, task: Task, event: PlayerLootItemEvent): Int {
+        return event.itemData?.amount ?: 0
     }
 }

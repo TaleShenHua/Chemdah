@@ -67,7 +67,7 @@ object ActionLocation {
                     actionFuture { f ->
                         newFrame(input).run<Location>().thenApply { loc ->
                             run(value).double { value ->
-                                write(loc, value)
+                                loc?.let { write(loc, value) }
                                 f.complete(loc)
                             }
                         }
@@ -79,7 +79,7 @@ object ActionLocation {
                     actionFuture { f ->
                         newFrame(input).run<Location>().thenApply { loc ->
                             run(value).double { value ->
-                                append(loc, value)
+                                loc?.let { append(loc, value) }
                                 f.complete(loc)
                             }
                         }
@@ -90,7 +90,7 @@ object ActionLocation {
             }
         } catch (ex: Exception) {
             it.reset()
-            actionFuture { f -> newFrame(input).run<Location>().thenApply { loc -> f.complete(read(loc)) } }
+            actionFuture { f -> newFrame(input).run<Location>().thenApply { loc -> f.complete(loc?.let { read(loc) }) } }
         }
     }
 }

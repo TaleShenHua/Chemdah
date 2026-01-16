@@ -31,7 +31,7 @@ import taboolib.common.platform.function.adaptCommandSender
 import taboolib.common.platform.function.submit
 import taboolib.common.platform.function.submitAsync
 import taboolib.common5.Baffle
-import taboolib.module.chat.TellrawJson
+import taboolib.module.chat.impl.DefaultComponent
 import taboolib.platform.util.isMovement
 import taboolib.platform.util.sendLang
 import java.util.concurrent.ConcurrentHashMap
@@ -219,9 +219,9 @@ object AddonTrackEvents {
                         // 获取任务名称
                         val displayName = e.trackingQuest.track()?.name ?: e.trackingQuest.displayName()
                         // 构建 Tellraw 信息
-                        TellrawJson().append(message.replace("name" to displayName))
+                        DefaultComponent().append(message.replace("name" to displayName))
                             .hoverText(message.replace("name" to displayName))
-                            .runCommand("/ChemdahTrackCancel")
+                            .clickRunCommand("/ChemdahTrackCancel")
                             .sendTo(adaptCommandSender(e.player))
                     }
                 }

@@ -39,7 +39,7 @@ object NameGenerator : Module {
         val file = File(getDataFolder(), "module/generator/$name.ks")
         return if (file.exists()) {
             val readText = file.readLines().filter { !it.trimStart().startsWith('#') }
-            runKether { (1..amount).map { KetherShell.eval(readText, namespace = namespace).getNow("null").toString() } }!!
+            runKether { (1..amount).map { KetherShell.eval(readText, ScriptOptions.builder().namespace(namespace).build()).getNow("null").toString() } }!!
         } else emptyList()
     }
 

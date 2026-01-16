@@ -4,6 +4,7 @@ import net.minecraft.world.level.block.state.IBlockData
 import net.minecraft.world.level.block.state.IBlockDataHolder
 import org.bukkit.block.Block
 import taboolib.module.nms.MinecraftVersion
+import taboolib.module.nms.MinecraftVersion.versionId
 
 /**
  * Chemdah
@@ -16,16 +17,16 @@ class NMSImpl : NMS() {
 
     override fun getBlocKData(block: Block): Map<String, Any> {
         return when {
-            MinecraftVersion.majorLegacy >= 11800 -> {
+            versionId >= 11800 -> {
                 ((block.blockData as CraftBlockData19).state as IBlockDataHolder<NMSBlock, IBlockData>).values.mapKeys { it.key.name }
             }
-            MinecraftVersion.majorLegacy >= 11600 -> {
+            versionId >= 11600 -> {
                 (block.blockData as CraftBlockData16).state.stateMap.mapKeys { it.key.name }
             }
-            MinecraftVersion.majorLegacy >= 11400 -> {
+            versionId >= 11400 -> {
                 (block.blockData as CraftBlockData14).state.stateMap.mapKeys { it.key.a() }
             }
-            MinecraftVersion.majorLegacy >= 11300 -> {
+            versionId >= 11300 -> {
                 (block.blockData as CraftBlockData13).state.stateMap.mapKeys { it.key.a() }
             }
             else -> emptyMap()

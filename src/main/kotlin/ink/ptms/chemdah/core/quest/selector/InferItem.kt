@@ -1,7 +1,6 @@
 package ink.ptms.chemdah.core.quest.selector
 
 import ink.ptms.chemdah.api.event.InferItemHookEvent
-import ink.ptms.chemdah.core.quest.selector.Flags.Companion.matchType
 import ink.ptms.chemdah.util.startsWithAny
 import ink.ptms.chemdah.util.substringAfterAny
 import org.bukkit.inventory.Inventory

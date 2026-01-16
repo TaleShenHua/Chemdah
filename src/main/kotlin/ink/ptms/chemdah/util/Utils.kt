@@ -16,6 +16,7 @@ import taboolib.library.xseries.XMaterial
 import taboolib.module.chat.colored
 import taboolib.module.configuration.Configuration
 import taboolib.module.nms.MinecraftVersion
+import taboolib.module.nms.MinecraftVersion.versionId
 import taboolib.platform.type.BukkitProxyEvent
 import taboolib.platform.util.modifyMeta
 
@@ -60,7 +61,7 @@ fun Any?.asDouble(def: Double = 0.0): Double {
  * @return [Boolean]
  */
 fun XMaterial.isBlock(block: Block): Boolean {
-    return XBlock.isSimilar(block, this) && (MinecraftVersion.majorLegacy >= 11300 || block.data == data)
+    return XBlock.isSimilar(block, this) && (versionId >= 11300 || block.data == data)
 }
 
 /**
@@ -107,7 +108,7 @@ fun <T> safely(func: () -> T): T? {
  * @return [PotionEffect]
  */
 fun PotionEffect.hidden(): PotionEffect {
-    if (MinecraftVersion.majorLegacy >= 11300) {
+    if (versionId >= 11300) {
         try {
             setProperty("icon", false)
             setProperty("particles", false)

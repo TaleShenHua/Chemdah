@@ -1,21 +1,20 @@
 package ink.ptms.chemdah.core.quest.addon.data
 
-import com.google.common.cache.Cache
-import com.google.common.cache.CacheBuilder
 import ink.ptms.adyeshach.api.AdyeshachAPI
+import ink.ptms.adyeshach.common.entity.EntityInstance
 import ink.ptms.chemdah.core.quest.selector.InferArea
 import ink.ptms.chemdah.util.Effects
 import ink.ptms.chemdah.util.asListOrLines
 import org.bukkit.Location
 import org.bukkit.Particle
 import org.bukkit.entity.Player
-import taboolib.common.platform.ProxyParticle
 import taboolib.common.platform.function.adaptPlayer
 import taboolib.common.platform.function.submit
 import taboolib.common.util.Vector
 import taboolib.common.util.asList
 import taboolib.common5.Baffle
 import taboolib.library.configuration.ConfigurationSection
+import taboolib.library.xseries.XParticle
 import taboolib.module.chat.colored
 import taboolib.module.navigation.NodeEntity
 import taboolib.module.navigation.createPathfinder
@@ -23,12 +22,6 @@ import taboolib.module.nms.createPacket
 import taboolib.module.nms.sendBundlePacket
 import taboolib.platform.util.toBukkitLocation
 import taboolib.platform.util.toProxyLocation
-import java.util.concurrent.TimeUnit
-
-/**
- * 空坐标单例
- */
-object NullLocation : Location(null, 0.0, 0.0, 0.0)
 
 /**
  * 追踪中心接口
@@ -67,15 +60,14 @@ class LocationTrackCenter(val center: String) : TrackCenter {
  */
 class AdyeshachTrackCenter(val id: String) : TrackCenter {
 
-    // 坐标缓存
-    val cache: Cache<String, Location> = CacheBuilder.newBuilder().expireAfterWrite(250, TimeUnit.MILLISECONDS).build()
-
     override fun identifier(): String = id
 
     override fun getLocation(player: Player): Location? {
-        // 获取缓存坐标
-        val loc = cache.get(player.name) { AdyeshachAPI.getEntityFromId(id, player)?.getLocation()?.add(0.0, 1.0, 0.0) ?: NullLocation }
-        return if (loc is NullLocation) null else loc
+        return getEntityInstance(player)?.getLocation()?.add(0.0, 1.0, 0.0)
+    }
+
+    fun getEntityInstance(player: Player): EntityInstance? {
+        return AdyeshachAPI.getEntityFromId(id, player)
     }
 }
 
@@ -93,9 +85,9 @@ class TrackBeacon(val config: ConfigurationSection, val root: ConfigurationSecti
      * 粒子类型
      */
     val type = try {
-        ProxyParticle.valueOf(config.getString("beacon-option.type", root.getString("type"))!!.uppercase())
+        XParticle.valueOf(config.getString("beacon-option.type", root.getString("type"))!!.uppercase())
     } catch (ex: Throwable) {
-        ProxyParticle.VILLAGER_HAPPY
+        XParticle.HAPPY_VILLAGER
     }
 
     /**
@@ -133,7 +125,7 @@ class TrackBeacon(val config: ConfigurationSection, val root: ConfigurationSecti
             val direction = center.toVector().subtract(player.location.toVector()).normalize()
             player.location.add(direction.multiply(distance.coerceAtMost(distance)))
         }
-        type.sendTo(adaptPlayer(player), pos.toProxyLocation(), Vector(size, 128.0, size), count)
+        player.spawnParticle(type.get()!!, pos, count, size, 128.0, size)
     }
 }
 
@@ -152,7 +144,8 @@ class TrackLandmark(val config: ConfigurationSection, val root: ConfigurationSec
      */
     val content = if (config.contains("landmark-option.content")) {
         // 适配 Chemdah Lab
-        config["landmark-option.content"]!!.asList().flatMap { it.lines() }.colored().ifEmpty { root["content"]!!.asList().colored() }
+        config["landmark-option.content"]!!.asList().flatMap { it.lines() }.colored()
+            .ifEmpty { root["content"]!!.asList().colored() }
     } else {
         root["content"]!!.asList().colored()
     }
@@ -193,9 +186,11 @@ class TrackNavigation(val config: ConfigurationSection, val root: ConfigurationS
      * 点形特效相关设置
      */
     val pointType = try {
-        ProxyParticle.valueOf(config.getString("navigation-option.point.type", root.getString("point.type"))!!.uppercase())
+        XParticle.valueOf(
+            config.getString("navigation-option.point.type", root.getString("point.type"))!!.uppercase()
+        )
     } catch (ex: Throwable) {
-        ProxyParticle.CRIT
+        XParticle.CRIT
     }
     val pointY = config.getDouble("navigation-option.point.y", root.getDouble("point.y"))
     val pointSizeX = config.getDouble("navigation-option.point.size.x", root.getDouble("point.size.x"))
@@ -225,19 +220,15 @@ class TrackNavigation(val config: ConfigurationSection, val root: ConfigurationS
     fun displayPoint(player: Player, center: Location) {
         submit(async = !sync) {
             // 创建寻路任务
-            val pathFinder = createPathfinder(NodeEntity(player.location, 2.0, 1.0, canOpenDoors = true, canPassDoors = true))
+            val pathFinder =
+                createPathfinder(NodeEntity(player.location, 2.0, 1.0, canOpenDoors = true, canPassDoors = true))
             val path = pathFinder.findPath(center, distance)
             val nodes = path?.nodes ?: return@submit
             // 播放特效
             nodes.forEachIndexed { index, node ->
                 // 速度
                 submit(delay = index * pointSpeed) {
-                    pointType.sendTo(
-                        player = adaptPlayer(player),
-                        location = node.asBlockPos().toLocation(center.world!!).add(0.5, pointY, 0.5).toProxyLocation(),
-                        offset = Vector(pointSizeX, pointSizeY, pointSizeX),
-                        count = pointCount
-                    )
+                    player.spawnParticle(pointType.get()!!, node.asBlockPos().toLocation(center.world!!).add(0.5, pointY, 0.5), pointCount, pointSizeX, pointSizeY, pointSizeX)
                 }
             }
         }
@@ -248,7 +239,8 @@ class TrackNavigation(val config: ConfigurationSection, val root: ConfigurationS
      */
     fun displayArrow(player: Player, center: Location) {
         submit(async = !sync) {
-            val pathFinder = createPathfinder(NodeEntity(player.location, 2.0, 1.0, canOpenDoors = true, canPassDoors = true))
+            val pathFinder =
+                createPathfinder(NodeEntity(player.location, 2.0, 1.0, canOpenDoors = true, canPassDoors = true))
             val path = pathFinder.findPath(center, distance)
             val nodes = path?.nodes ?: return@submit
             // 播放特效
@@ -256,9 +248,11 @@ class TrackNavigation(val config: ConfigurationSection, val root: ConfigurationS
                 // 速度
                 submit(delay = it * arrowSpeed) {
                     // 起始坐标
-                    val start = nodes[it].asBlockPos().toLocation(center.world!!).add(0.5, arrowY, 0.5).toProxyLocation()
+                    val start =
+                        nodes[it].asBlockPos().toLocation(center.world!!).add(0.5, arrowY, 0.5).toProxyLocation()
                     // 结束坐标
-                    val target = nodes[it + 1].asBlockPos().toLocation(center.world!!).add(0.5, arrowY, 0.5).toProxyLocation()
+                    val target =
+                        nodes[it + 1].asBlockPos().toLocation(center.world!!).add(0.5, arrowY, 0.5).toProxyLocation()
                     // 绘制特效
                     val packets = Effects.drawArrow(start, target, arrowDensity, arrowLen, arrowAngle).map { pos ->
                         arrowType.createPacket(pos.toBukkitLocation(), org.bukkit.util.Vector(0, 0, 0))

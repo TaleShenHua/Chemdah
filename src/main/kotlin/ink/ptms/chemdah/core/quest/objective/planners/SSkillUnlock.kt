@@ -1,6 +1,6 @@
-package ink.ptms.chemdah.core.quest.objective.skillapi
+package ink.ptms.chemdah.core.quest.objective.planners
 
-import com.sucy.skill.api.event.PlayerSkillUnlockEvent
+import com.bh.planners.api.event.PlayerSkillUpgradeEvent
 import ink.ptms.chemdah.core.quest.objective.Dependency
 import ink.ptms.chemdah.core.quest.objective.ObjectiveCountableI
 
@@ -11,24 +11,24 @@ import ink.ptms.chemdah.core.quest.objective.ObjectiveCountableI
  * @author Peng_Lx
  * @since 2021/5/29 7:59 下午
  */
-@Dependency("SkillAPI")
-object SSkillUnlock : ObjectiveCountableI<PlayerSkillUnlockEvent>() {
+@Dependency("Planners")
+object SSkillUnlock : ObjectiveCountableI<PlayerSkillUpgradeEvent>() {
 
     override val name = "skillapi skillunlock"
-    override val event = PlayerSkillUnlockEvent::class.java
+    override val event = PlayerSkillUpgradeEvent::class.java
 
     init {
         handler {
-            it.playerData.player
+            it.player
         }
         addSimpleCondition("position") { data, it ->
-            data.toPosition().inside(it.playerData.player.location)
+            data.toPosition().inside(it.player.location)
         }
         addSimpleCondition("skill") { data, it ->
-            data.toString().equals(it.unlockedSkill.status.name, true)
+            data.toString().equals(it.skillData.key, true)
         }
         addConditionVariable("skill") {
-            it.unlockedSkill.status.name
+            it.skillData.key
         }
     }
 }

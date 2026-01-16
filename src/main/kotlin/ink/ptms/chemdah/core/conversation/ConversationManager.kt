@@ -1,6 +1,6 @@
 package ink.ptms.chemdah.core.conversation
 
-import com.sucy.skill.api.event.PlayerCastSkillEvent
+import com.bh.planners.api.event.EntitySkillEvents
 import ink.ptms.chemdah.api.ChemdahAPI
 import ink.ptms.chemdah.api.ChemdahAPI.conversationSession
 import ink.ptms.chemdah.api.event.collect.ConversationEvents
@@ -177,10 +177,10 @@ object ConversationManager {
         }
     }
 
-    @SubscribeEvent(bind = "com.sucy.skill.api.event.PlayerCastSkillEvent")
+    @SubscribeEvent(bind = "com.bh.planners.api.event.EntitySkillEvents.CastPre")
     private fun onPlayerCastSkillEvent(oe: OptionalEvent) {
-        val e = oe.get<PlayerCastSkillEvent>()
-        if (e.player.conversationSession != null) {
+        val e = oe.get<EntitySkillEvents.CastPre>()
+        if ((e.entity as? Player)?.conversationSession != null) {
             e.isCancelled = true
         }
     }

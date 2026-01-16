@@ -43,9 +43,9 @@ object CommandChemdahVariables {
             dynamic(comment ="value") {
                 execute<CommandSender> { sender, ctx, argument ->
                     val time = System.currentTimeMillis()
-                    ChemdahAPI.setVariable(ctx.argument(-1), argument)
+                    ChemdahAPI.setVariable(ctx["key"], argument)
                     if (sender is Player) {
-                        sender.sendLang("command-variables-change", "${ctx.argument(-1)} §8= §f$argument §7(${System.currentTimeMillis() - time}ms)")
+                        sender.sendLang("command-variables-change", "${ctx["key"]} §8= §f$argument §7(${System.currentTimeMillis() - time}ms)")
                     }
                 }
             }
@@ -59,9 +59,9 @@ object CommandChemdahVariables {
             dynamic(comment ="value") {
                 execute<CommandSender> { sender, ctx, argument ->
                     val time = System.currentTimeMillis()
-                    ChemdahAPI.setVariable(ctx.argument(-1), argument, true)
+                    ChemdahAPI.setVariable(ctx["key"], argument, true)
                     if (sender is Player) {
-                        sender.sendLang("command-variables-change", "${ctx.argument(-1)} §8+= §f$argument §7(${System.currentTimeMillis() - time}ms)")
+                        sender.sendLang("command-variables-change", "${ctx["key"]} §8+= §f$argument §7(${System.currentTimeMillis() - time}ms)")
                     }
                 }
             }

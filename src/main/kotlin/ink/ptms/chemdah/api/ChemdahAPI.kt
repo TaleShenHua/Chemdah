@@ -26,10 +26,7 @@ import taboolib.common.platform.function.adaptPlayer
 import taboolib.common.platform.function.getDataFolder
 import taboolib.common.platform.function.warning
 import taboolib.common.util.ResettableLazy
-import taboolib.module.kether.KetherFunction
-import taboolib.module.kether.KetherShell
-import taboolib.module.kether.Workspace
-import taboolib.module.kether.printKetherErrorMessage
+import taboolib.module.kether.*
 import taboolib.module.lang.Language
 import java.io.File
 import java.util.concurrent.CompletableFuture
@@ -275,12 +272,16 @@ object ChemdahAPI {
 
     fun invokeKether(source: String, player: Player? = null, vars: Map<String, Any> = emptyMap()): CompletableFuture<Any?> {
         val map = KetherShell.VariableMap(*vars.map { it.key to it.value }.toTypedArray())
-        return KetherShell.eval(source, sender = if (player != null) adaptPlayer(player) else null, namespace = namespace, vars = map)
+        val options = ScriptOptions.builder().namespace(namespace).vars(map)
+        if (player != null) options.sender(adaptPlayer(player))
+        return KetherShell.eval(source, options.build())
     }
 
     fun parseFunction(source: String, player: Player? = null, vars: Map<String, Any> = emptyMap()): String {
         val map = KetherShell.VariableMap(*vars.map { it.key to it.value }.toTypedArray())
-        return KetherFunction.parse(source, sender = if (player != null) adaptPlayer(player) else null, namespace = namespace, vars = map)
+        val options = ScriptOptions.builder().namespace(namespace).vars(map)
+        if (player != null) options.sender(adaptPlayer(player))
+        return KetherFunction.parse(source, options.build())
     }
 
     @Awake(LifeCycle.ACTIVE)

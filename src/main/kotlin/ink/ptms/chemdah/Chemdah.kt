@@ -7,6 +7,7 @@ import taboolib.module.configuration.Config
 import taboolib.module.configuration.Configuration
 import taboolib.module.lang.sendLang
 import taboolib.module.nms.MinecraftVersion
+import taboolib.module.nms.MinecraftVersion.versionId
 import taboolib.platform.BukkitPlugin
 
 object Chemdah : Plugin() {
@@ -20,7 +21,7 @@ object Chemdah : Plugin() {
     }
 
     override fun onLoad() {
-        if (MinecraftVersion.majorLegacy < 10900 || !MinecraftVersion.isSupported) {
+        if (versionId < 10900 || !MinecraftVersion.isSupported) {
             console().sendLang("not-support")
             disablePlugin()
         }

@@ -11,6 +11,7 @@ import taboolib.library.xseries.XItemStack
 import taboolib.module.chat.colored
 import taboolib.module.kether.KetherFunction
 import taboolib.module.kether.KetherShell
+import taboolib.module.kether.ScriptOptions
 import taboolib.platform.util.modifyMeta
 
 /**
@@ -37,10 +38,9 @@ open class Item(val config: ConfigurationSection) {
      * 进行 Kether 格式化并进行颜色替换
      */
     protected fun format(str: String?, player: PlayerProfile, ui: UI, template: Template): String {
-        return KetherFunction.parse(str ?: return "null",
-            namespace = namespaceQuestUI,
-            sender = adaptCommandSender(player.player),
-            vars = KetherShell.VariableMap("@QuestUI" to ui, "@QuestSelected" to template.node)
+        return KetherFunction.parse(
+            str ?: return "null",
+            ScriptOptions.builder().namespace(namespaceQuestUI).sender(adaptCommandSender(player.player)).vars(KetherShell.VariableMap("@QuestUI" to ui, "@QuestSelected" to template.node)).build()
         ).colored()
     }
 }

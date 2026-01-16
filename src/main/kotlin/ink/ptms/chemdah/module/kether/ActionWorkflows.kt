@@ -25,7 +25,7 @@ object ActionWorkflows {
                 e.playerProfile.persistentDataContainer.remove(k)
                 val id = k.substring("workflows.fetch.".length)
                 val fetch = data.getString(id)!!
-                KetherShell.eval(fetch, sender = adaptPlayer(e.player), namespace = namespace)
+                KetherShell.eval(fetch, ScriptOptions.builder().sender(adaptPlayer(e.player)).namespace(namespace).build())
             }
         }
     }

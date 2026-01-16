@@ -9,6 +9,7 @@ import ink.ptms.chemdah.core.quest.addon.AddonControl.Companion.control
 import ink.ptms.chemdah.core.quest.addon.AddonOptional.Companion.isOptional
 import ink.ptms.chemdah.core.quest.addon.AddonRestart.Companion.canRestart
 import ink.ptms.chemdah.core.quest.addon.AddonTimeout.Companion.isTimeout
+import ink.ptms.chemdah.core.quest.addon.AddonUI.Companion.reward
 import ink.ptms.chemdah.core.quest.addon.data.ControlTrigger
 import ink.ptms.chemdah.util.exceptNull
 import org.bukkit.entity.Player
@@ -114,8 +115,9 @@ class Quest(val id: String, val profile: PlayerProfile, val persistentDataContai
                             profile.persistentDataContainer["quest.complete.$id"] = System.currentTimeMillis()
                             profile.unregisterQuest(this@Quest)
                             template.control().signature(profile, ControlTrigger.COMPLETE)
-                            template.agent(profile, AgentType.QUEST_COMPLETED)
+                            template.reward(profile)
                             QuestEvents.Complete.Post(this@Quest, profile).call()
+                            template.agent(profile, AgentType.QUEST_COMPLETED)
                         }
                         future.complete(it)
                     }.exceptNull {

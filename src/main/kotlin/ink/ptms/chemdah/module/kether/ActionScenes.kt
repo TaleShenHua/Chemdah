@@ -25,6 +25,7 @@ import taboolib.library.reflex.Reflex.Companion.invokeMethod
 import taboolib.library.xseries.parseToMaterial
 import taboolib.module.kether.*
 import taboolib.module.nms.MinecraftVersion
+import taboolib.module.nms.MinecraftVersion.versionId
 import taboolib.module.nms.PacketReceiveEvent
 import taboolib.platform.util.toBukkitLocation
 import java.util.concurrent.CompletableFuture
@@ -188,7 +189,7 @@ class ActionScenes {
             if (e.packet.name == "PacketPlayInUseItem") {
                 val pos = if (MinecraftVersion.isUniversal) {
                     e.packet.read<Any>("a/blockPos")!!
-                } else if (MinecraftVersion.majorLegacy >= 11400) {
+                } else if (versionId >= 11400) {
                     e.packet.read<Any>("a/c")!!
                 } else {
                     e.packet.read<Any>("a")!!
@@ -247,7 +248,7 @@ class ActionScenes {
 
         fun Player.removeScenesBlock(location: Location) {
             scenesBlocks[name]?.get(world.name)?.remove(Vector(location.x, location.y, location.z))
-            if (MinecraftVersion.majorLegacy >= 11300) {
+            if (versionId >= 11300) {
                 sendBlockChange(location, location.block.blockData)
             } else {
                 sendBlockChange(location, location.block.type, location.block.data)
@@ -258,7 +259,7 @@ class ActionScenes {
             val worlds = scenesBlocks.computeIfAbsent(name) { ConcurrentHashMap() }
             val blocks = worlds.computeIfAbsent(world.name) { ConcurrentHashMap() }
             blocks[Vector(location.x, location.y, location.z)] = ScenesBlockData(material, data)
-            if (MinecraftVersion.majorLegacy >= 11300) {
+            if (versionId >= 11300) {
                 sendBlockChange(location, material.createBlockData())
             } else {
                 sendBlockChange(location, material, data)
@@ -269,7 +270,7 @@ class ActionScenes {
             scenesBlocks[name]?.get(world.name)?.forEach {
                 val loc = it.key.toLocation(world.name).toBukkitLocation()
                 if (loc.distance(location) < 128) {
-                    if (MinecraftVersion.majorLegacy >= 11300) {
+                    if (versionId >= 11300) {
                         sendBlockChange(loc, it.value.material.createBlockData())
                     } else {
                         sendBlockChange(loc, it.value.material, it.value.data)

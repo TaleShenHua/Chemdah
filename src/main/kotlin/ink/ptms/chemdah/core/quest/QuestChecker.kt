@@ -43,7 +43,7 @@ object QuestChecker {
                         CompletableFuture.allOf(*quest.tasks.map { task ->
                             // 处理需要自动检查的任务类型
                             if (task.objective.isTickable) {
-                                QuestLoader.handleTask(profile, task, quest, EMPTY_EVENT)
+                                QuestLoader.handleTask(profile, task, quest, EMPTY_EVENT, false)
                                 CompletableFuture.completedFuture(null)
                             } else {
                                 task.objective.checkComplete(profile, task, quest)

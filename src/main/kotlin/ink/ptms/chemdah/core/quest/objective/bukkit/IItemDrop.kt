@@ -1,8 +1,8 @@
 package ink.ptms.chemdah.core.quest.objective.bukkit
 
+import com.hitable.hipeequip.event.PlayerDropItemEvent
 import ink.ptms.chemdah.core.quest.objective.Dependency
 import ink.ptms.chemdah.core.quest.objective.ObjectiveCountableI
-import org.bukkit.event.player.PlayerDropItemEvent
 
 /**
  * Chemdah
@@ -25,7 +25,7 @@ object IItemDrop : ObjectiveCountableI<PlayerDropItemEvent>() {
             data.toPosition().inside(e.player.location)
         }
         addSimpleCondition("item") { data, e ->
-            data.toInferItem().isItem(e.itemDrop.itemStack)
+            e.itemData?.itemKey == data.toString()
         }
     }
 }

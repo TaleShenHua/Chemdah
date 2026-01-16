@@ -10,6 +10,7 @@ import taboolib.common.util.asList
 import taboolib.common5.Coerce
 import taboolib.common5.TimeCycle
 import taboolib.module.kether.KetherShell
+import taboolib.module.kether.ScriptOptions
 import taboolib.module.kether.printKetherErrorMessage
 import java.util.concurrent.CompletableFuture
 
@@ -61,9 +62,9 @@ open class ControlAgent(val agent: List<String>) : Control() {
 
     override fun check(profile: PlayerProfile, template: Template): CompletableFuture<ControlResult> {
         return try {
-            KetherShell.eval(agent.asList(), sender = adaptPlayer(profile.player), namespace = namespaceQuest) {
+            KetherShell.eval(agent.asList(), ScriptOptions.builder().sender(adaptPlayer(profile.player)).namespace(namespaceQuest).context {
                 set("@QuestContainer", template)
-            }.thenApply {
+            }.build()).thenApply {
                 Coerce.toBoolean(it).toResult("agent")
             }
         } catch (e: Throwable) {

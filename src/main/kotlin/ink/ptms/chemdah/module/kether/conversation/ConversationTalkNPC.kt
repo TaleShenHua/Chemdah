@@ -18,7 +18,7 @@ class ConversationTalkNPC(val token: String) : ScriptAction<Void>() {
 
     override fun run(frame: ScriptFrame): CompletableFuture<Void> {
         try {
-            frame.getSession().npcSide.add(KetherFunction.parse(token, namespace = namespaceConversationNPC) { extend(frame.vars()) }.colored())
+            frame.getSession().npcSide.add(KetherFunction.parse(token, ScriptOptions.builder().namespace(namespaceConversationNPC).context { extend(frame.vars()) }.build()).colored())
         } catch (e: Throwable) {
             e.printKetherErrorMessage()
         }

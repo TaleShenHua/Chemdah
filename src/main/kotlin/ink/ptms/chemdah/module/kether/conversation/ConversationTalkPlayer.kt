@@ -20,7 +20,7 @@ class ConversationTalkPlayer(val token: String) : ScriptAction<Void>() {
     override fun run(frame: ScriptFrame): CompletableFuture<Void> {
         val session = frame.getSession()
         try {
-            KetherFunction.parse(token, namespace = namespaceConversationPlayer) { extend(frame.vars()) }.run {
+            KetherFunction.parse(token, ScriptOptions.builder().namespace(namespaceConversationPlayer).context { extend(frame.vars()) }.build()).run {
                 val messages = split("\\n").colored()
                 val theme = session.conversation.option.instanceTheme
                 if (theme.allowFarewell()) {

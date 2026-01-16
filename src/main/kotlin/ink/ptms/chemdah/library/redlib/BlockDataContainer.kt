@@ -8,13 +8,13 @@ import org.bukkit.event.block.BlockPistonEvent
 import org.bukkit.util.io.BukkitObjectInputStream
 import org.bukkit.util.io.BukkitObjectOutputStream
 import taboolib.common.LifeCycle
-import taboolib.common.TabooLibCommon
 import taboolib.common.io.unzip
 import taboolib.common.io.zip
 import taboolib.common.platform.Awake
 import taboolib.common.platform.event.EventPriority
 import taboolib.common.platform.event.SubscribeEvent
 import taboolib.common.platform.function.getDataFolder
+import taboolib.common.platform.function.registerLifeCycleTask
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.util.concurrent.CompletableFuture
@@ -34,7 +34,7 @@ object BlockDataContainer {
     @Awake(LifeCycle.LOAD)
     private fun init() {
         // 在 ENABLE 之前初始化 BlockDataManager，否则脚本将无法正常调用
-        TabooLibCommon.postpone(LifeCycle.ENABLE) {
+        registerLifeCycleTask(LifeCycle.ENABLE) {
             if (QuestDevelopment.enableBlockContainer || QuestDevelopment.enableUniqueBlock) {
                 val path = getDataFolder().toPath().resolve("blocks.db")
                 // 加载不同模式的 BlockDataManager

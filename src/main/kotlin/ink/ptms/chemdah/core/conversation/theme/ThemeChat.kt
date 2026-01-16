@@ -14,7 +14,6 @@ import net.md_5.bungee.api.chat.TextComponent
 import org.bukkit.event.player.AsyncPlayerChatEvent
 import org.bukkit.event.player.PlayerItemHeldEvent
 import org.bukkit.event.player.PlayerSwapHandItemsEvent
-import taboolib.common.platform.ProxyParticle
 import taboolib.common.platform.event.EventPriority
 import taboolib.common.platform.event.SubscribeEvent
 import taboolib.common.platform.function.adaptCommandSender
@@ -23,10 +22,13 @@ import taboolib.common.platform.function.submit
 import taboolib.common5.Coerce
 import taboolib.common5.util.printed
 import taboolib.library.reflex.Reflex.Companion.invokeConstructor
-import taboolib.module.chat.TellrawJson
+import taboolib.library.xseries.XParticle
+import taboolib.module.chat.ComponentText
 import taboolib.module.chat.colored
+import taboolib.module.chat.impl.DefaultComponent
 import taboolib.module.chat.uncolored
 import taboolib.module.kether.KetherFunction
+import taboolib.module.kether.ScriptOptions
 import taboolib.module.kether.extend
 import taboolib.module.kether.isInt
 import taboolib.module.nms.PacketSendEvent
@@ -34,7 +36,6 @@ import taboolib.module.nms.nmsClass
 import taboolib.module.nms.sendPacket
 import taboolib.platform.util.asLangText
 import taboolib.platform.util.asLangTextOrNull
-import taboolib.platform.util.toProxyLocation
 import java.util.concurrent.CompletableFuture
 import kotlin.text.contains
 
@@ -173,7 +174,7 @@ object ThemeChat : Theme<ThemeChatSettings>() {
 
     override fun onBegin(session: Session): CompletableFuture<Void> {
         if (session.conversation.noFlag("NO_EFFECT:PARTICLE")) {
-            ProxyParticle.CLOUD.sendTo(adaptPlayer(session.player), session.origin.clone().add(0.0, 0.5, 0.0).toProxyLocation())
+            session.player.spawnParticle(XParticle.CLOUD.get()!!, session.origin.clone().add(0.0, 0.5, 0.0), 1)
         }
         return super.onBegin(session)
     }
@@ -263,11 +264,11 @@ object ThemeChat : Theme<ThemeChatSettings>() {
             // 最终效果
             val animationStopped = lineIndex + 1 >= messages.size && stopAnimation
             // 如果是最终效果并且存在对话转发，则不发送白信息
-            val json = if (noSpace || (animationStopped && session.player.hasTransmitMessages() && !canReply)) TellrawJson().fixed() else newJson()
+            val json = if (noSpace || (animationStopped && session.player.hasTransmitMessages() && !canReply)) DefaultComponent().fixed() else newJson()
             try {
                 // 获取对话总格式 —— 识别内联脚本并继承会话变量
                 val mainFormat = settings.format.map {
-                    KetherFunction.parse(it, sender = adaptPlayer(session.player), namespace = namespace) { extend(session.variables) }.colored()
+                    KetherFunction.parse(it, ScriptOptions.builder().sender(adaptPlayer(session.player)).namespace(namespace).context { extend(session.variables) }.build()).colored()
                 }
                 mainFormat.forEach { format ->
                     when {
@@ -336,7 +337,7 @@ object ThemeChat : Theme<ThemeChatSettings>() {
                                         }
                                         // 当动画结束时，显示回复内容
                                         if (animationStopped) {
-                                            json.append(format.replace("reply" to rf)).runCommand("/session reply ${reply.rid}")
+                                            json.append(format.replace("reply" to rf)).clickRunCommand("/session reply ${reply.rid}")
                                             // 是否启用鼠标悬停显示
                                             if (settings.hoverText) {
                                                 json.hoverText(text)
@@ -349,7 +350,7 @@ object ThemeChat : Theme<ThemeChatSettings>() {
                                     } else {
                                         // 当动画结束时，显示回复内容
                                         if (animationStopped) {
-                                            json.append(format.replace("reply" to rf)).runCommand("/session reply ${reply.rid}")
+                                            json.append(format.replace("reply" to rf)).clickRunCommand("/session reply ${reply.rid}")
                                             // 是否启用鼠标悬停显示
                                             if (settings.hoverText) {
                                                 json.hoverText(text)
@@ -414,11 +415,11 @@ object ThemeChat : Theme<ThemeChatSettings>() {
         return if (session.playerSide == reply) format.select else format.other
     }
 
-    private fun newJson(): TellrawJson {
-        return TellrawJson().also { json -> repeat(settings.spaceLine) { json.newLine() } }.fixed()
+    private fun newJson(): ComponentText {
+        return DefaultComponent().also { json -> repeat(settings.spaceLine) { json.newLine() } }.fixed()
     }
 
-    private fun TellrawJson.fixed(): TellrawJson {
-        return append("\n").runCommand("PLEASE!PASS!ME!d3486345-e35d-326a-b5c5-787de3814770!")
+    private fun ComponentText.fixed(): ComponentText {
+        return append("\n").clickRunCommand("PLEASE!PASS!ME!d3486345-e35d-326a-b5c5-787de3814770!")
     }
 }

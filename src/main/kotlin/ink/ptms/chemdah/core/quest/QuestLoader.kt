@@ -16,14 +16,13 @@ import ink.ptms.chemdah.core.quest.objective.Objective
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import taboolib.common.LifeCycle
-import taboolib.common.io.getInstance
-import taboolib.common.io.runningClasses
+import taboolib.common.io.runningClassesWithoutLibrary
 import taboolib.common.platform.Awake
 import taboolib.common.platform.event.EventPriority
 import taboolib.common.platform.function.*
 import taboolib.module.configuration.Config
 import taboolib.module.configuration.Configuration
-import taboolib.module.nms.MinecraftVersion
+import taboolib.module.nms.MinecraftVersion.versionId
 import java.io.File
 
 /**
@@ -43,35 +42,37 @@ object QuestLoader {
     @Awake(LifeCycle.ENABLE)
     fun registerAll() {
         val checkDependency = !File(getDataFolder(), "api.json").exists()
-        runningClasses.forEach {
-            if (Objective::class.java.isAssignableFrom(it) && !it.isAnnotationPresent(Abstract::class.java)) {
+        runningClassesWithoutLibrary.forEach {
+            val clazz = it.toClass()
+            if (Objective::class.java.isAssignableFrom(clazz) && !clazz.isAnnotationPresent(Abstract::class.java)) {
                 // 检测依赖环境
-                if (checkDependency && it.isAnnotationPresent(Dependency::class.java)) {
-                    val dependency = it.getAnnotation(Dependency::class.java)
+                if (checkDependency && clazz.isAnnotationPresent(Dependency::class.java)) {
+                    val dependency = clazz.getAnnotation(Dependency::class.java)
                     // 不支持的扩展
                     if (dependency.plugin != "minecraft" && Bukkit.getPluginManager().getPlugin(dependency.plugin) == null) {
                         return@forEach
                     }
                     // 不支持的版本
-                    if (MinecraftVersion.majorLegacy < dependency.version) {
+                    if (versionId < dependency.version) {
                         return@forEach
                     }
                 }
                 // 注册目标
                 try {
-                    (it.getInstance()?.get() as? Objective<*>)?.register()
+                    (it.getInstance() as? Objective<*>)?.register()
                 } catch (ignored: NoClassDefFoundError) {
                     // 例如版本问题导致的错误，无法被精确的判断
                     // ClassNotFoundException: com.destroystokyo.paper.event.player.PlayerElytraBoostEvent
                 }
-            } else if (it.isAnnotationPresent(Id::class.java)) {
-                val id = it.getAnnotation(Id::class.java).id
+            } else if (clazz.isAnnotationPresent(Id::class.java)) {
+                val id = clazz.getAnnotation(Id::class.java).id
                 when {
-                    Meta::class.java.isAssignableFrom(it) -> {
-                        ChemdahAPI.questMeta[id] = it as Class<out Meta<*>>
+                    Meta::class.java.isAssignableFrom(clazz) -> {
+                        ChemdahAPI.questMeta[id] = clazz as Class<out Meta<*>>
                     }
-                    Addon::class.java.isAssignableFrom(it) -> {
-                        ChemdahAPI.questAddon[id] = it as Class<out Addon>
+
+                    Addon::class.java.isAssignableFrom(clazz) -> {
+                        ChemdahAPI.questAddon[id] = clazz as Class<out Addon>
                     }
                 }
             }
@@ -122,7 +123,13 @@ object QuestLoader {
     }
 
     @Suppress("UNCHECKED_CAST")
-    fun <T : Any> handleTask(profile: PlayerProfile, task: Task, quest: Quest, event: T) {
+    fun <T : Any> handleTask(
+        profile: PlayerProfile,
+        task: Task,
+        quest: Quest,
+        event: T,
+        checkCompleteFuture: Boolean = true
+    ) {
         val objective: Objective<T> = task.objective as Objective<T>
         // 如果含有完成标记，则不在进行该条目
         if (objective.hasCompletedSignature(profile, task)) {
@@ -138,7 +145,7 @@ object QuestLoader {
                     // 检查条目
                     objective.checkComplete(profile, task, quest).thenAccept {
                         // 检查任务
-                        quest.checkCompleteFuture()
+                        if (checkCompleteFuture) quest.checkCompleteFuture()
                     }
                 }
             }

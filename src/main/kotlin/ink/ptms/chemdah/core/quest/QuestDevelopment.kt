@@ -16,6 +16,7 @@ import taboolib.library.reflex.Reflex.Companion.getProperty
 import taboolib.module.configuration.Configuration
 import taboolib.module.lang.sendLang
 import taboolib.module.nms.MinecraftVersion
+import taboolib.module.nms.MinecraftVersion.versionId
 import taboolib.module.nms.PacketSendEvent
 import taboolib.module.nms.sendPacket
 import java.io.File
@@ -49,7 +50,7 @@ object QuestDevelopment {
             enableMessageTransmit = conf.getBoolean("enable-message-transmit")
 
             // 1.19 版本下该功能暂时停用
-            if (MinecraftVersion.majorLegacy >= 11900) {
+            if (versionId >= 11900) {
                 enableMessageTransmit = false
                 console().sendLang("console-message-transmit-not-support")
             }
@@ -83,7 +84,7 @@ object QuestDevelopment {
             var a = e.packet.read<Any>("a").toString()
             if (a == "null") {
                 // 1.18 的聊天低版本的 Raw 信息可能来自其他字段
-                if (MinecraftVersion.major >= 10 || MinecraftVersion.majorLegacy < 11700) {
+                if (MinecraftVersion.major >= 10 || versionId < 11700) {
                     kotlin.runCatching { a = Coerce.toList(e.packet.read<Any>("components")).toString() }
                 } else {
                     return
@@ -117,7 +118,7 @@ object QuestDevelopment {
             playerRelease[name] = list
             playerMessageCache[name]?.forEach { packet ->
                 var value = packet.getProperty<Any>("a").toString()
-                if (value == "null" && MinecraftVersion.majorLegacy < 11700) {
+                if (value == "null" && versionId < 11700) {
                     kotlin.runCatching { value = Coerce.toList(packet.getProperty<Any>("components")).toString() }
                 }
                 list.add(value)

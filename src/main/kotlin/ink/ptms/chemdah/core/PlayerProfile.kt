@@ -17,6 +17,7 @@ import taboolib.common.platform.function.submitAsync
 import taboolib.common.util.asList
 import taboolib.common5.Coerce
 import taboolib.module.kether.KetherShell
+import taboolib.module.kether.ScriptOptions
 import taboolib.module.kether.printKetherErrorMessage
 import java.util.*
 import java.util.concurrent.CompletableFuture
@@ -157,11 +158,11 @@ class PlayerProfile(val uniqueId: UUID) {
     fun checkAgent(agent: Any?, quest: Quest? = null, variables: Map<String, Any> = emptyMap()): CompletableFuture<Boolean> {
         agent ?: return CompletableFuture.completedFuture(true)
         return try {
-            KetherShell.eval(agent.asList(), sender = adaptCommandSender(player), namespace = namespaceQuest) {
+            KetherShell.eval(agent.asList(), ScriptOptions.builder().sender(adaptCommandSender(player)).namespace(namespaceQuest).context {
                 set("@QuestSelected", quest?.template?.node)
                 set("@QuestContainer", quest)
                 variables.forEach { (t, u) -> set(t, u) }
-            }.thenApply {
+            }.build()).thenApply {
                 Coerce.toBoolean(it)
             }
         } catch (e: Throwable) {

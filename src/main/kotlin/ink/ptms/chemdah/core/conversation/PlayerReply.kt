@@ -9,10 +9,7 @@ import org.bukkit.entity.Player
 import taboolib.common.util.asList
 import taboolib.common5.Coerce
 import taboolib.module.chat.colored
-import taboolib.module.kether.KetherFunction
-import taboolib.module.kether.KetherShell
-import taboolib.module.kether.extend
-import taboolib.module.kether.printKetherErrorMessage
+import taboolib.module.kether.*
 import java.util.*
 import java.util.concurrent.CompletableFuture
 
@@ -61,7 +58,7 @@ data class PlayerReply(val root: MutableMap<String, Any?>) {
      */
     fun build(session: Session): String {
         return try {
-            KetherFunction.parse(text, namespace = namespaceConversationPlayer) { extend(session.variables) }.colored()
+            KetherFunction.parse(text, ScriptOptions.builder().namespace(namespaceConversationPlayer).context { extend(session.variables) }.build()).colored()
         } catch (e: Throwable) {
             e.printKetherErrorMessage()
             e.localizedMessage
@@ -84,7 +81,7 @@ data class PlayerReply(val root: MutableMap<String, Any?>) {
 
             else -> {
                 try {
-                    KetherShell.eval(condition!!, namespace = namespaceConversationPlayer) { extend(session.variables) }.thenApply { Coerce.toBoolean(it) }
+                    KetherShell.eval(condition!!, ScriptOptions.builder().namespace(namespaceConversationPlayer).context { extend(session.variables) }.build()).thenApply { Coerce.toBoolean(it) }
                 } catch (e: Throwable) {
                     e.printKetherErrorMessage()
                     CompletableFuture.completedFuture(false)
@@ -111,7 +108,7 @@ data class PlayerReply(val root: MutableMap<String, Any?>) {
         }
         session.isSelected = true
         return try {
-            KetherShell.eval(action, namespace = namespaceConversationPlayer) { extend(session.variables) }.thenAccept {
+            KetherShell.eval(action, ScriptOptions.builder().namespace(namespaceConversationPlayer).context { extend(session.variables) }.build()).thenAccept {
                 if (session.isNext) {
                     session.isNext = false
                 } else {

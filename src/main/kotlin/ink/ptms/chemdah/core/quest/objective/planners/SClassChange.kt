@@ -1,6 +1,6 @@
-package ink.ptms.chemdah.core.quest.objective.skillapi
+package ink.ptms.chemdah.core.quest.objective.planners
 
-import com.sucy.skill.api.event.PlayerClassChangeEvent
+import com.bh.planners.api.event.PlayerSelectedJobEvent
 import ink.ptms.chemdah.core.quest.objective.Dependency
 import ink.ptms.chemdah.core.quest.objective.ObjectiveCountableI
 
@@ -12,24 +12,24 @@ import ink.ptms.chemdah.core.quest.objective.ObjectiveCountableI
  * @since 2021/7/18 2:05 下午
  */
 
-@Dependency("SkillAPI")
-object SClassChange : ObjectiveCountableI<PlayerClassChangeEvent>() {
+@Dependency("Planners")
+object SClassChange : ObjectiveCountableI<PlayerSelectedJobEvent>() {
 
     override val name = "skillapi class change"
-    override val event = PlayerClassChangeEvent::class.java
+    override val event = PlayerSelectedJobEvent::class.java
 
     init {
         handler {
-            it.playerData.player
+            it.profile.getPlayer()
         }
         addSimpleCondition("position") { data, it ->
-            data.toPosition().inside(it.playerData.player.location)
+            data.toPosition().inside(it.profile.getPlayer()!!.location)
         }
         addSimpleCondition("class") { data, it ->
-            data.toString().equals(it.newClass.name, true)
+            data.toString().equals(it.profile.getCurrentJob()?.jobKey ?: "", true)
         }
         addConditionVariable("class") {
-            it.newClass.name
+            it.profile.getCurrentJob()?.jobKey ?: ""
         }
     }
 }
